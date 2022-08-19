@@ -21,18 +21,6 @@ export const FeedbackProvider = ({ children }) => {
     fetchFeedback();
   }, []);
 
-  //To delete feedback
-  const deleteFeedback = (id) => {
-    if (window.confirm("Are you sure you want to delete?")) {
-      const newFeedback = feedback.filter((el) => {
-        return el.id !== id;
-      });
-      setFeedback(newFeedback);
-    } else {
-      return;
-    }
-  };
-
   //To add feedback
 
   const addFeedback = async (newFeedback) => {
@@ -47,11 +35,30 @@ export const FeedbackProvider = ({ children }) => {
     setFeedback([data, ...feedback]);
   };
 
+  //To delete feedback
+  const deleteFeedback = async (id) => {
+    if (window.confirm("Are you sure you want to delete?")) {
+      await fetch(`/feedback/${id}`, { method: "DELETE" });
+
+      setFeedback(feedback.filter((item) => item.id !== id));
+    }
+  };
+
   //Update feedback item
 
-  const updateFeedback = (id, updItm) => {
+  const updateFeedback = async (id, updItm) => {
+    const response = await fetch(`/feedback/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updItm),
+    });
+
+    const data = await response.json();
+
     setFeedback(
-      feedback.map((item) => (item.id === id ? { ...item, ...updItm } : item))
+      feedback.map((item) => (item.id === id ? { ...item, ...data } : item))
     );
 
     setFeedbackEdit({
